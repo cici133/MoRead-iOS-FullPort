@@ -1,0 +1,65 @@
+name: Build iOS unsigned IPA
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'MoRead/**'
+      - 'project.yml'
+      - '.github/workflows/build-ios-unsigned.yml'
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        run: xcodegen generate
+      - name: Resolve Swift packages
+        run: xcodebuild -project MoRead.xcodeproj -scheme MoRead -resolvePackageDependencies
+      - name: Verify generated project
+        run: |
+          set -euo pipefail
+          xcodebuild -project MoRead.xcodeproj -scheme MoRead -showBuildSettings >/tmp/moread-build-settings.txt
+          grep -q 'PRODUCT_BUNDLE_IDENTIFIER = com.mozhi.reader.ios' /tmp/moread-build-settings.txt
+          grep -q 'IPHONEOS_DEPLOYMENT_TARGET = 17.0' /tmp/moread-build-settings.txt
+      - name: Build unsigned app
+        run: |
+          set -euo pipefail
+          rm -rf build
+          mkdir -p build
+          set +e
+          xcodebuild \
+            -project MoRead.xcodeproj \
+            -scheme MoRead \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            build 2>&1 | tee build/xcodebuild.log
+          STATUS=${PIPESTATUS[0]}
+          set -e
+          test "$STATUS" -eq 0 || exit "$STATUS"
+          APP=$(find build/DerivedData/Build/Products/Release-iphoneos -maxdepth 1 -name '*.app' -print -quit)
+          test -n "$APP"
+          bash ./scripts/verify_built_app.sh "$APP"
+          rm -rf build/Payload
+          mkdir -p build/Payload
+          cp -R "$APP" build/Payload/
+          (cd build && /usr/bin/zip -qry MoRead-unsigned.ipa Payload)
+          unzip -tq build/MoRead-unsigned.ipa
+          unzip -l build/MoRead-unsigned.ipa | grep -q 'Payload/.*\.app/Info.plist'
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoRead-xcodebuild-log
+          path: build/xcodebuild.log
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MoRead-unsigned-ipa
+          path: build/MoRead-unsigned.ipa

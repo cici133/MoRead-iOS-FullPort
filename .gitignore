@@ -1,0 +1,10 @@
+.DS_Store
+build/
+DerivedData/
+*.ipa
+*.xcarchive
+*.xcuserstate
+xcuserdata/
+.swiftpm/
+.build/
+MoRead.xcodeproj/
