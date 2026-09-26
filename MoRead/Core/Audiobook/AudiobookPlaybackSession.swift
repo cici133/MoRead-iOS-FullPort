@@ -20,7 +20,7 @@ import Foundation
     }
     private func advance(){guard playing else{return};if currentIndex+1<segments.count{currentIndex += 1;playCurrent()}else{playing=false}}
     private func configureAudioSession()throws{let s=AVAudioSession.sharedInstance();let mix=TTSSettingsStore.shared.settings.allowAudioMixing;try s.setCategory(.playback,mode:.spokenAudio,options:mix ? [.mixWithOthers]:[]);try s.setActive(true)}
-    func audioPlayerDidFinishPlaying(_ player:AVAudioPlayer,successfully flag:Bool){advance()}
-    func speechSynthesizer(_ synthesizer:AVSpeechSynthesizer,didFinish utterance:AVSpeechUtterance){advance()}
+    nonisolated func audioPlayerDidFinishPlaying(_ player:AVAudioPlayer,successfully flag:Bool){Task { @MainActor [weak self] in self?.advance() }}
+    nonisolated func speechSynthesizer(_ synthesizer:AVSpeechSynthesizer,didFinish utterance:AVSpeechUtterance){Task { @MainActor [weak self] in self?.advance() }}
 }
 private extension String{var nilIfEmpty:String?{isEmpty ? nil:self}}

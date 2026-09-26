@@ -49,14 +49,31 @@ final class TTSManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate 
         } catch { }
     }
 
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString characterRange: NSRange, utterance: AVSpeechUtterance) {
-        if let mapping = activeMapping {
-            let source = mapping.sourceRange(displayStart: characterRange.location, displayEnd: characterRange.location + characterRange.length)
-            highlightedRange = NSRange(location: baseUTF16Offset + source.location, length: source.length)
-        } else {
-            highlightedRange = NSRange(location: baseUTF16Offset + characterRange.location, length: characterRange.length)
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString characterRange: NSRange, utterance: AVSpeechUtterance) {
+        let location = characterRange.location
+        let length = characterRange.length
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            if let mapping = self.activeMapping {
+                let source = mapping.sourceRange(displayStart: location, displayEnd: location + length)
+                self.highlightedRange = NSRange(location: self.baseUTF16Offset + source.location, length: source.length)
+            } else {
+                self.highlightedRange = NSRange(location: self.baseUTF16Offset + location, length: length)
+            }
         }
     }
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) { isSpeaking = false; highlightedRange = nil; onFinished?() }
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) { isSpeaking = false; highlightedRange = nil }
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            self.isSpeaking = false
+            self.highlightedRange = nil
+            self.onFinished?()
+        }
+    }
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+        Task { @MainActor [weak self] in
+            self?.isSpeaking = false
+            self?.highlightedRange = nil
+        }
+    }
 }

@@ -59,7 +59,7 @@ struct ToolCall: Codable, Hashable, Sendable {
   var reasoningDetails: [[String: JSONValue]] = []
 }
 
-struct ToolSpec: Sendable {
+struct ToolSpec: @unchecked Sendable {
   var name: String
   var description: String
   var parameters: [String: Any]
@@ -85,7 +85,7 @@ enum ChatDelta: Sendable {
   case toolCalls([ToolCall])
 }
 
-struct ChatOptions: Sendable {
+struct ChatOptions: @unchecked Sendable {
   var temperature: Double? = nil
   var topP: Double? = nil
   var maxTokens: Int? = nil

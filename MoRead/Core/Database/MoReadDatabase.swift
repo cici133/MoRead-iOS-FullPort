@@ -162,7 +162,7 @@ actor MoReadDatabase {
             try execute("COMMIT")
             return value
         } catch {
-            try? execute("ROLLBACK")
+            _ = try? execute("ROLLBACK")
             throw error
         }
     }
@@ -228,8 +228,8 @@ actor MoReadDatabase {
             try execute("COMMIT")
             try execute("PRAGMA foreign_keys = ON")
         } catch {
-            try? execute("ROLLBACK")
-            try? execute("PRAGMA foreign_keys = ON")
+            _ = try? execute("ROLLBACK")
+            _ = try? execute("PRAGMA foreign_keys = ON")
             throw error
         }
     }

@@ -10,7 +10,7 @@ struct APILogView: View {
                     .font(.footnote).foregroundStyle(.secondary)
                 Button("清空日志", role: .destructive) { store.clear() }.disabled(store.entries.isEmpty)
             }
-            Section {
+            Section(header: Text("最近调用")) {
                 if store.entries.isEmpty { ContentUnavailableView("暂无日志", systemImage: "list.bullet.rectangle") }
                 ForEach(store.entries) { entry in
                     VStack(alignment: .leading, spacing: 5) {
@@ -30,8 +30,6 @@ struct APILogView: View {
                         if let error = entry.errorType { Text(error).font(.caption2).foregroundStyle(.red) }
                     }.padding(.vertical,3)
                 }
-            } header: {
-                Text("最近调用")
             }
         }
         .navigationTitle("API 调用日志")

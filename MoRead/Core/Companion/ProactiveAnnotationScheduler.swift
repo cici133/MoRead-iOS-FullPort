@@ -121,7 +121,7 @@ actor ProactiveAnnotationScheduler {
                 else { limits.maxPerChapter = min(limits.maxPerChapter, fairShare) }
             }
 
-            let prompt = try await PersonaRepository.shared.systemPrompt(for: persona, triggerText: "")
+            let prompt = await PersonaRepository.shared.systemPrompt(for: persona, triggerText: "")
             let result = try await ProactiveAnnotationService.shared.generate(
                 bookId: trigger.bookId,
                 chapterIndex: trigger.chapterIndex,

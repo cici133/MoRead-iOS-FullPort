@@ -155,7 +155,7 @@ enum AIHTTP {
   }
 }
 
-struct RequestOverrides: Sendable {
+struct RequestOverrides: @unchecked Sendable {
   var headers: [String: String] = [:]
   var body: [String: Any] = [:]
   static func parse(_ raw: String?) -> RequestOverrides {

@@ -27,6 +27,8 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf build/PreflightDerivedData
+          mkdir -p .ci-logs
+          set +e
           xcodebuild \
             -project MoRead.xcodeproj \
             -scheme MoRead \
@@ -34,16 +36,26 @@ jobs:
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
             -derivedDataPath build/PreflightDerivedData \
+            SWIFT_COMPILATION_MODE=singlefile \
+            OTHER_SWIFT_FLAGS=-continue-building-after-errors \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY='' \
-            build
+            build 2>&1 | tee .ci-logs/preflight-xcodebuild.log
+          STATUS=${PIPESTATUS[0]}
+          set -e
+          if [ "$STATUS" -ne 0 ]; then
+            echo "===== all compile errors found in this preflight ====="
+            grep -nE '(^| )error:' .ci-logs/preflight-xcodebuild.log || true
+            exit "$STATUS"
+          fi
       - name: Build unsigned app
         run: |
           set -euo pipefail
           rm -rf build
           mkdir -p build
           set +e
+          mkdir -p .ci-logs
           xcodebuild \
             -project MoRead.xcodeproj \
             -scheme MoRead \
@@ -54,7 +66,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY='' \
-            build 2>&1 | tee build/xcodebuild.log
+            build 2>&1 | tee .ci-logs/release-xcodebuild.log
           STATUS=${PIPESTATUS[0]}
           set -e
           test "$STATUS" -eq 0 || exit "$STATUS"
@@ -67,12 +79,12 @@ jobs:
           (cd build && /usr/bin/zip -qry MoRead-unsigned.ipa Payload)
           unzip -tq build/MoRead-unsigned.ipa
           unzip -l build/MoRead-unsigned.ipa | grep -q 'Payload/.*\.app/Info.plist'
-      - name: Upload build log
+      - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: MoRead-xcodebuild-log
-          path: build/xcodebuild.log
+          path: .ci-logs/*.log
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:
