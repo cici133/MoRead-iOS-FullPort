@@ -207,16 +207,25 @@ actor PersonaRepository {
         let worldBookEnabled = (r["worldBookEnabled"]?.int64 ?? 1) != 0
         let memoryEnabled = (r["memoryEnabled"]?.int64 ?? 1) != 0
         let isBuiltIn = (r["isBuiltIn"]?.int64 ?? 0) != 0
-        return .init(
-            id: id, name: r["name"]?.string ?? "", avatarPath: r["avatarPath"]?.string,
-            subtitle: r["subtitle"]?.string ?? "", personality: r["personality"]?.string ?? "",
-            speakingStyle: r["speakingStyle"]?.string ?? "", greeting: r["greeting"]?.string ?? "",
-            exampleDialogs: examples, isRoleplay: isRoleplay, enabledTools: tools, worldBook: worldBook,
-            worldBookEnabled: worldBookEnabled, chatModelId: r["chatModelId"]?.int64,
-            userProfile: r["userProfile"]?.string ?? "", memoryEnabled: memoryEnabled,
-            chatAppearanceJSON: r["chatAppearanceJson"]?.string ?? "{}", voiceId: r["voiceId"]?.string ?? "",
-            voiceEmotion: r["voiceEmotion"]?.string ?? "", isBuiltIn: isBuiltIn,
-            createdAt: r["createdAt"]?.int64 ?? 0)
+        let name: String = r["name"]?.string ?? ""
+        let avatarPath: String? = r["avatarPath"]?.string
+        let subtitle: String = r["subtitle"]?.string ?? ""
+        let personality: String = r["personality"]?.string ?? ""
+        let speakingStyle: String = r["speakingStyle"]?.string ?? ""
+        let greeting: String = r["greeting"]?.string ?? ""
+        let chatModelId: Int64? = r["chatModelId"]?.int64
+        let userProfile: String = r["userProfile"]?.string ?? ""
+        let chatAppearanceJSON: String = r["chatAppearanceJson"]?.string ?? "{}"
+        let voiceId: String = r["voiceId"]?.string ?? ""
+        let voiceEmotion: String = r["voiceEmotion"]?.string ?? ""
+        let createdAt: Int64 = r["createdAt"]?.int64 ?? 0
+        return PersonaRecord(id: id, name: name, avatarPath: avatarPath, subtitle: subtitle,
+                             personality: personality, speakingStyle: speakingStyle, greeting: greeting,
+                             exampleDialogs: examples, isRoleplay: isRoleplay, enabledTools: tools,
+                             worldBook: worldBook, worldBookEnabled: worldBookEnabled, chatModelId: chatModelId,
+                             userProfile: userProfile, memoryEnabled: memoryEnabled,
+                             chatAppearanceJSON: chatAppearanceJSON, voiceId: voiceId,
+                             voiceEmotion: voiceEmotion, isBuiltIn: isBuiltIn, createdAt: createdAt)
     }
 
     private static func now() -> Int64 { Int64(Date().timeIntervalSince1970 * 1000) }

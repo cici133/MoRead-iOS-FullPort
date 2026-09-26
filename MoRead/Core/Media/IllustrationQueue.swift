@@ -24,10 +24,15 @@ actor IllustrationQueue {
     func retry(id:String)async throws{try await db.execute("UPDATE illustration_queue SET status='pending',error='' WHERE id=?",[.text(id)])}
     private static func row(_ r: [String: SQLValue]) -> IllustrationQueueItem? {
         guard let id = r["id"]?.string, let bookId = r["bookId"]?.int64 else { return nil }
-        let chapterIndex = Int(r["chapterIndex"]?.int64 ?? 0)
-        return .init(id: id, bookId: bookId, chapterIndex: chapterIndex,
-                     sourceText: r["sourceText"]?.string ?? "", recipeJSON: r["recipeJson"]?.string ?? "",
-                     status: r["status"]?.string ?? "pending", illustrationId: r["illustrationId"]?.int64,
-                     error: r["error"]?.string ?? "", createdAt: r["createdAt"]?.int64 ?? 0)
+        let chapterIndex: Int = Int(r["chapterIndex"]?.int64 ?? 0)
+        let sourceText: String = r["sourceText"]?.string ?? ""
+        let recipeJSON: String = r["recipeJson"]?.string ?? ""
+        let status: String = r["status"]?.string ?? "pending"
+        let illustrationId: Int64? = r["illustrationId"]?.int64
+        let error: String = r["error"]?.string ?? ""
+        let createdAt: Int64 = r["createdAt"]?.int64 ?? 0
+        return IllustrationQueueItem(id: id, bookId: bookId, chapterIndex: chapterIndex, sourceText: sourceText,
+                                     recipeJSON: recipeJSON, status: status, illustrationId: illustrationId,
+                                     error: error, createdAt: createdAt)
     }
 }

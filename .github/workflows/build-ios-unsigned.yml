@@ -23,6 +23,21 @@ jobs:
           xcodebuild -project MoRead.xcodeproj -scheme MoRead -showBuildSettings >/tmp/moread-build-settings.txt
           grep -q 'PRODUCT_BUNDLE_IDENTIFIER = com.mozhi.reader.ios' /tmp/moread-build-settings.txt
           grep -q 'IPHONEOS_DEPLOYMENT_TARGET = 17.0' /tmp/moread-build-settings.txt
+      - name: Fast compile gate
+        run: |
+          set -euo pipefail
+          rm -rf build/PreflightDerivedData
+          xcodebuild \
+            -project MoRead.xcodeproj \
+            -scheme MoRead \
+            -configuration Debug \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/PreflightDerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            build
       - name: Build unsigned app
         run: |
           set -euo pipefail

@@ -40,10 +40,14 @@ actor AICreationRepository {
     }
     private static func version(_ r: [String: SQLValue]) -> AICreationVersionRecord? {
         guard let id = r["id"]?.int64, let creationId = r["creationId"]?.int64 else { return nil }
-        let ord = Int(r["ord"]?.int64 ?? 0)
-        return .init(id: id, creationId: creationId, ord: ord, directive: r["directive"]?.string ?? "",
-                     content: r["content"]?.string ?? "", status: r["status"]?.string ?? "DONE",
-                     modelName: r["modelName"]?.string ?? "", createdAt: r["createdAt"]?.int64 ?? 0)
+        let ord: Int = Int(r["ord"]?.int64 ?? 0)
+        let directive: String = r["directive"]?.string ?? ""
+        let content: String = r["content"]?.string ?? ""
+        let status: String = r["status"]?.string ?? "DONE"
+        let modelName: String = r["modelName"]?.string ?? ""
+        let createdAt: Int64 = r["createdAt"]?.int64 ?? 0
+        return AICreationVersionRecord(id: id, creationId: creationId, ord: ord, directive: directive,
+                                       content: content, status: status, modelName: modelName, createdAt: createdAt)
     }
 }
 

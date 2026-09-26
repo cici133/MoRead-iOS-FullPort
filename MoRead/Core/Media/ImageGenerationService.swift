@@ -230,16 +230,22 @@ actor ImageGenerationService {
     private static func findImageReference(in value:Any)->String?{if let s=value as? String,(s.hasPrefix("data:image") || s.hasPrefix("https://") || s.hasPrefix("http://")){return s};if let a=value as? [Any]{for v in a{if let x=findImageReference(in:v){return x}}};if let d=value as? [String:Any]{for v in d.values{if let x=findImageReference(in:v){return x}}};return nil}
     private static func row(_ r: [String: SQLValue]) -> GeneratedIllustration? {
         guard let id = r["id"]?.int64, let bookId = r["bookId"]?.int64 else { return nil }
-        let chapterIndex = r["chapterIndex"]?.int64.map(Int.init)
-        let charOffset = r["charOffset"]?.int64.map(Int.init)
-        let width = Int(r["pixelWidth"]?.int64 ?? 0)
-        let height = Int(r["pixelHeight"]?.int64 ?? 0)
-        return .init(id: id, bookId: bookId, chapterIndex: chapterIndex, charOffset: charOffset,
-                     sourceText: r["sourceText"]?.string ?? "", prompt: r["prompt"]?.string ?? "",
-                     imagePath: r["imagePath"]?.string ?? "", mediaType: r["mediaType"]?.string,
-                     pixelWidth: width, pixelHeight: height, personaId: r["createdByPersonaId"]?.int64,
-                     recipeJSON: r["recipeJson"]?.string ?? "", castKeysJSON: r["castKeys"]?.string ?? "[]",
-                     createdAt: r["createdAt"]?.int64 ?? 0)
+        let chapterIndex: Int? = r["chapterIndex"]?.int64.map(Int.init)
+        let charOffset: Int? = r["charOffset"]?.int64.map(Int.init)
+        let sourceText: String = r["sourceText"]?.string ?? ""
+        let prompt: String = r["prompt"]?.string ?? ""
+        let imagePath: String = r["imagePath"]?.string ?? ""
+        let mediaType: String? = r["mediaType"]?.string
+        let width: Int = Int(r["pixelWidth"]?.int64 ?? 0)
+        let height: Int = Int(r["pixelHeight"]?.int64 ?? 0)
+        let personaId: Int64? = r["createdByPersonaId"]?.int64
+        let recipeJSON: String = r["recipeJson"]?.string ?? ""
+        let castKeysJSON: String = r["castKeys"]?.string ?? "[]"
+        let createdAt: Int64 = r["createdAt"]?.int64 ?? 0
+        return GeneratedIllustration(id: id, bookId: bookId, chapterIndex: chapterIndex, charOffset: charOffset,
+                                     sourceText: sourceText, prompt: prompt, imagePath: imagePath, mediaType: mediaType,
+                                     pixelWidth: width, pixelHeight: height, personaId: personaId,
+                                     recipeJSON: recipeJSON, castKeysJSON: castKeysJSON, createdAt: createdAt)
     }
     private static func now()->Int64{Int64(Date().timeIntervalSince1970*1000)}
 }

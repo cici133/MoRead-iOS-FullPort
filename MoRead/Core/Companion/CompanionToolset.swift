@@ -75,16 +75,20 @@ actor NoteRepository {
 
     private static func row(_ r: [String: SQLValue]) -> ReaderNote? {
         guard let id = r["id"]?.int64, let bookId = r["bookId"]?.int64 else { return nil }
-        let relatedChapter = r["relatedChapterIndex"]?.int64.map(Int.init)
-        let relatedOffset = r["relatedCharOffset"]?.int64.map(Int.init)
-        let scopeChapter = r["sourceScopeChapterIndex"]?.int64.map(Int.init)
-        let scopeOffset = r["sourceScopeCharOffset"]?.int64.map(Int.init)
-        return .init(id: id, bookId: bookId, personaId: r["personaId"]?.int64,
-                     title: r["title"]?.string ?? "", contentMarkdown: r["contentMarkdown"]?.string ?? "",
-                     kind: r["kind"]?.string ?? "", relatedChapterIndex: relatedChapter,
-                     relatedCharOffset: relatedOffset, sourceScopeChapterIndex: scopeChapter,
-                     sourceScopeCharOffset: scopeOffset, createdAt: r["createdAt"]?.int64 ?? 0,
-                     updatedAt: r["updatedAt"]?.int64 ?? 0)
+        let personaId: Int64? = r["personaId"]?.int64
+        let title: String = r["title"]?.string ?? ""
+        let contentMarkdown: String = r["contentMarkdown"]?.string ?? ""
+        let kind: String = r["kind"]?.string ?? ""
+        let relatedChapter: Int? = r["relatedChapterIndex"]?.int64.map(Int.init)
+        let relatedOffset: Int? = r["relatedCharOffset"]?.int64.map(Int.init)
+        let scopeChapter: Int? = r["sourceScopeChapterIndex"]?.int64.map(Int.init)
+        let scopeOffset: Int? = r["sourceScopeCharOffset"]?.int64.map(Int.init)
+        let createdAt: Int64 = r["createdAt"]?.int64 ?? 0
+        let updatedAt: Int64 = r["updatedAt"]?.int64 ?? 0
+        return ReaderNote(id: id, bookId: bookId, personaId: personaId, title: title,
+                          contentMarkdown: contentMarkdown, kind: kind, relatedChapterIndex: relatedChapter,
+                          relatedCharOffset: relatedOffset, sourceScopeChapterIndex: scopeChapter,
+                          sourceScopeCharOffset: scopeOffset, createdAt: createdAt, updatedAt: updatedAt)
     }
 }
 

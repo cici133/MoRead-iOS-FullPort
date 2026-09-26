@@ -46,14 +46,19 @@ actor AudiobookRepository {
     private func upsertChapter(_ x:AudiobookChapterState,status:AudiobookChapterStatus,confirmedAt:Int64?=nil)async throws{try await db.execute("INSERT INTO audiobook_chapters(bookId,chapterIndex,state,scriptedAt,confirmedAt,synthesizedAt,segmentCount,readySegmentCount,totalMillis) VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(bookId,chapterIndex) DO UPDATE SET state=excluded.state,scriptedAt=excluded.scriptedAt,confirmedAt=excluded.confirmedAt,synthesizedAt=excluded.synthesizedAt,segmentCount=excluded.segmentCount,readySegmentCount=excluded.readySegmentCount,totalMillis=excluded.totalMillis",[.integer(x.bookId),.integer(Int64(x.chapterIndex)),.text(status.rawValue),.integer(x.scriptedAt),.integer(confirmedAt ?? x.confirmedAt),.integer(x.synthesizedAt),.integer(Int64(x.segmentCount)),.integer(Int64(x.readySegmentCount)),.integer(x.totalMillis)])}
     private static func role(_ r: [String: SQLValue]) -> AudiobookRole? {
         guard let id = r["id"]?.int64, let bookId = r["bookId"]?.int64 else { return nil }
-        let aliases = (r["aliases"]?.string ?? "").split(separator: "|").map(String.init)
-        let kind = AudiobookRoleKind(rawValue: r["kind"]?.string ?? "") ?? .character
-        let engine = AudiobookEngine(rawValue: r["engine"]?.string ?? "") ?? .system
-        let sortOrder = Int(r["sortOrder"]?.int64 ?? 0)
-        return .init(id: id, bookId: bookId, name: r["name"]?.string ?? "", aliases: aliases,
-                     kind: kind, gender: r["gender"]?.string ?? "", engine: engine,
-                     voiceId: r["voiceId"]?.string ?? "", extraJSON: r["extraJson"]?.string ?? "{}",
-                     color: r["color"]?.string ?? "", sortOrder: sortOrder, source: r["source"]?.string ?? "manual")
+        let aliases: [String] = (r["aliases"]?.string ?? "").split(separator: "|").map(String.init)
+        let kind: AudiobookRoleKind = AudiobookRoleKind(rawValue: r["kind"]?.string ?? "") ?? .character
+        let engine: AudiobookEngine = AudiobookEngine(rawValue: r["engine"]?.string ?? "") ?? .system
+        let sortOrder: Int = Int(r["sortOrder"]?.int64 ?? 0)
+        let name: String = r["name"]?.string ?? ""
+        let gender: String = r["gender"]?.string ?? ""
+        let voiceId: String = r["voiceId"]?.string ?? ""
+        let extraJSON: String = r["extraJson"]?.string ?? "{}"
+        let color: String = r["color"]?.string ?? ""
+        let source: String = r["source"]?.string ?? "manual"
+        return AudiobookRole(id: id, bookId: bookId, name: name, aliases: aliases, kind: kind,
+                             gender: gender, engine: engine, voiceId: voiceId, extraJSON: extraJSON,
+                             color: color, sortOrder: sortOrder, source: source)
     }
     private static func segment(_ r: [String: SQLValue]) -> AudiobookSegment? {
         guard let id = r["id"]?.int64, let bookId = r["bookId"]?.int64 else { return nil }
@@ -68,14 +73,18 @@ actor AudiobookRepository {
     }
     private static func chapter(_ r: [String: SQLValue]) -> AudiobookChapterState? {
         guard let bookId = r["bookId"]?.int64 else { return nil }
-        let chapterIndex = Int(r["chapterIndex"]?.int64 ?? 0)
-        let segmentCount = Int(r["segmentCount"]?.int64 ?? 0)
-        let readyCount = Int(r["readySegmentCount"]?.int64 ?? 0)
-        return .init(bookId: bookId, chapterIndex: chapterIndex,
-                     state: r["state"]?.string ?? AudiobookChapterStatus.none.rawValue,
-                     scriptedAt: r["scriptedAt"]?.int64 ?? 0, confirmedAt: r["confirmedAt"]?.int64 ?? 0,
-                     synthesizedAt: r["synthesizedAt"]?.int64 ?? 0, segmentCount: segmentCount,
-                     readySegmentCount: readyCount, totalMillis: r["totalMillis"]?.int64 ?? 0)
+        let chapterIndex: Int = Int(r["chapterIndex"]?.int64 ?? 0)
+        let state: String = r["state"]?.string ?? AudiobookChapterStatus.none.rawValue
+        let scriptedAt: Int64 = r["scriptedAt"]?.int64 ?? 0
+        let confirmedAt: Int64 = r["confirmedAt"]?.int64 ?? 0
+        let synthesizedAt: Int64 = r["synthesizedAt"]?.int64 ?? 0
+        let segmentCount: Int = Int(r["segmentCount"]?.int64 ?? 0)
+        let readyCount: Int = Int(r["readySegmentCount"]?.int64 ?? 0)
+        let totalMillis: Int64 = r["totalMillis"]?.int64 ?? 0
+        return AudiobookChapterState(bookId: bookId, chapterIndex: chapterIndex, state: state,
+                                     scriptedAt: scriptedAt, confirmedAt: confirmedAt,
+                                     synthesizedAt: synthesizedAt, segmentCount: segmentCount,
+                                     readySegmentCount: readyCount, totalMillis: totalMillis)
     }
     private static func now()->Int64{Int64(Date().timeIntervalSince1970*1000)}
 }

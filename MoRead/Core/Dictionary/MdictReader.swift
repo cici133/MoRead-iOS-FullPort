@@ -37,7 +37,7 @@ final class MdictReader: @unchecked Sendable {
         let encrypted=(attrs["Encrypted"]=="Yes") ? 1 : (Int(attrs["Encrypted"] ?? "") ?? 0)
         guard encrypted & 1 == 0 else{throw Error.invalid("此词典需要授权密码，暂不支持导入加密授权词典")}
         encoding=Self.encoding(named:attrs["Encoding"],resource:self.resource)
-        caseSensitive=(attrs["KeyCaseSensitive"] ?? "").caseInsensitiveCompare("Yes")== .orderedSame
+        caseSensitive=(attrs["KeyCaseSensitive"] ?? "").caseInsensitiveCompare("Yes") == .orderedSame
         stripKeys = self.resource ? false : (attrs["StripKey"] ?? "").caseInsensitiveCompare("No") != .orderedSame
         declaredTitle=Self.unescape(attrs["Title"] ?? "")
         title=declaredTitle.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty ? url.deletingPathExtension().lastPathComponent : declaredTitle

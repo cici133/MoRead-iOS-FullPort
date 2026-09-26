@@ -128,7 +128,7 @@ struct ReaderFontAsset:Identifiable,Hashable{var id:String{path};var displayName
 enum ReaderFontLibrary{
     static func directory()->URL{AppPaths.readerCustom.appendingPathComponent("fonts",isDirectory:true)}
     static func register(_ url:URL)->ReaderFontAsset?{var error:Unmanaged<CFError>?;CTFontManagerRegisterFontsForURL(url as CFURL,.process,&error);guard let provider=CGDataProvider(url:url as CFURL),let font=CGFont(provider),let ps=font.postScriptName as String? else{return nil};return .init(displayName:(font.fullName as String?) ?? ps,postScriptName:ps,path:url.path)}
-    static func assets()->[ReaderFontAsset]{let dir=directory();try? FileManager.default.createDirectory(at:dir,withIntermediateDirectories:true);return (try? FileManager.default.contentsOfDirectory(at:dir,includingPropertiesForKeys:nil))?.compactMap(register).sorted{$0.displayName.localizedCaseInsensitiveCompare($1.displayName)== .orderedAscending} ?? []}
+    static func assets()->[ReaderFontAsset]{let dir=directory();try? FileManager.default.createDirectory(at:dir,withIntermediateDirectories:true);return (try? FileManager.default.contentsOfDirectory(at:dir,includingPropertiesForKeys:nil))?.compactMap(register).sorted{$0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending} ?? []}
 }
 
 private extension UIColor{

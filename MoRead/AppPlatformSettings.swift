@@ -76,8 +76,7 @@ final class ExternalOpenCoordinator: ObservableObject {
                 pendingMDD = PendingExternalMDD(url: target, name: url.lastPathComponent)
             case "txt":
                 let source = try await Task.detached(priority: .userInitiated) { try TextImporter.loadSource(url: url) }.value
-                let result = TxtChapterSplitter.chooseBest(source.text, rules: TxtChapterSplitter.rules)
-                let draft = result.importedBook(title: source.title, sourceURL: url)
+                let draft = TextImporter.importedBook(source: source, sourceURL: url)
                 try await store.importBook(draft)
                 message = "《\(draft.title)》已导入"
             case "epub":

@@ -157,9 +157,9 @@ actor VocabularyRepository {
     static let shared = VocabularyRepository()
     private var url: URL { get throws { try MoReadDatabase.applicationDirectory().appendingPathComponent("reader-custom/vocabulary.json") } }
     func list() throws -> [VocabularyEntry] { try load().sorted { $0.updatedAt > $1.updatedAt } }
-    func save(_ entry: VocabularyEntry) throws { var all=try load();all.removeAll{$0.word.caseInsensitiveCompare(entry.word)== .orderedSame};all.append(entry);try persist(all) }
-    func remove(word:String)throws{var all=try load();all.removeAll{$0.word.caseInsensitiveCompare(word)== .orderedSame};try persist(all)}
-    func setLearned(word:String,learned:Bool)throws{var all=try load();if let i=all.firstIndex(where:{$0.word.caseInsensitiveCompare(word)== .orderedSame}){all[i].learned=learned;all[i].updatedAt=Self.now()};try persist(all)}
+    func save(_ entry: VocabularyEntry) throws { var all=try load();all.removeAll{$0.word.caseInsensitiveCompare(entry.word) == .orderedSame};all.append(entry);try persist(all) }
+    func remove(word:String)throws{var all=try load();all.removeAll{$0.word.caseInsensitiveCompare(word) == .orderedSame};try persist(all)}
+    func setLearned(word:String,learned:Bool)throws{var all=try load();if let i=all.firstIndex(where:{$0.word.caseInsensitiveCompare(word) == .orderedSame}){all[i].learned=learned;all[i].updatedAt=Self.now()};try persist(all)}
     private func load()throws->[VocabularyEntry]{let u=try url;guard let data=try? Data(contentsOf:u) else{return []};return (try? JSONDecoder().decode([VocabularyEntry].self,from:data)) ?? []}
     private func persist(_ values:[VocabularyEntry])throws{let u=try url;try FileManager.default.createDirectory(at:u.deletingLastPathComponent(),withIntermediateDirectories:true);try JSONEncoder().encode(values).write(to:u,options:.atomic)}
     static func now()->Int64{Int64(Date().timeIntervalSince1970*1000)}

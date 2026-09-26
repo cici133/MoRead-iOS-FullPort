@@ -64,13 +64,20 @@ actor ReaderRecordRepository {
         let end = Int(r["endCharOffset"]?.int64 ?? 0)
         let scopeChapter = r["sourceScopeChapterIndex"]?.int64.map(Int.init)
         let scopeOffset = r["sourceScopeCharOffset"]?.int64.map(Int.init)
-        return .init(id: id, bookId: bookId, personaId: r["personaId"]?.int64,
-                     chapterIndex: chapterIndex, startCharOffset: start, endCharOffset: end,
-                     selectedText: r["selectedText"]?.string ?? "", note: r["note"]?.string ?? "",
-                     colorTag: r["colorTag"]?.string ?? "", style: r["style"]?.string ?? "HIGHLIGHT",
-                     mediaJSON: r["mediaJson"]?.string ?? "{}", sourceScopeChapterIndex: scopeChapter,
-                     sourceScopeCharOffset: scopeOffset, textAnchorJSON: r["textAnchorJson"]?.string ?? "",
-                     createdAt: r["createdAt"]?.int64 ?? 0, proactiveJobId: r["proactiveJobId"]?.int64)
+        let personaId: Int64? = r["personaId"]?.int64
+        let selectedText: String = r["selectedText"]?.string ?? ""
+        let note: String = r["note"]?.string ?? ""
+        let colorTag: String = r["colorTag"]?.string ?? ""
+        let style: String = r["style"]?.string ?? "HIGHLIGHT"
+        let mediaJSON: String = r["mediaJson"]?.string ?? "{}"
+        let textAnchorJSON: String = r["textAnchorJson"]?.string ?? ""
+        let createdAt: Int64 = r["createdAt"]?.int64 ?? 0
+        let proactiveJobId: Int64? = r["proactiveJobId"]?.int64
+        return ReaderAnnotation(id: id, bookId: bookId, personaId: personaId, chapterIndex: chapterIndex,
+                                startCharOffset: start, endCharOffset: end, selectedText: selectedText,
+                                note: note, colorTag: colorTag, style: style, mediaJSON: mediaJSON,
+                                sourceScopeChapterIndex: scopeChapter, sourceScopeCharOffset: scopeOffset,
+                                textAnchorJSON: textAnchorJSON, createdAt: createdAt, proactiveJobId: proactiveJobId)
     }
     private static func bookmark(_ r: [String: SQLValue]) -> ReaderBookmark? {
         guard let id = r["id"]?.int64, let bookId = r["bookId"]?.int64 else { return nil }
